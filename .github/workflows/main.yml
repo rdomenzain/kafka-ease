@@ -41,18 +41,38 @@ jobs:
         run: |
           python -m unittest -v
           coverage run -m pytest
-          coverage report
-          coverage html
-
-      # Archive code coverage html report
-      - name: Archive code coverage html report
-        uses: actions/upload-artifact@v2
-        with:
-          name: code-coverage-report
-          path: cotizador-api/htmlcov/index.html
+          coverage report -m
 
       # Run quality
       - name: Run quality
         run: |
           pip install bandit
           bandit -r ./ -x ./venv/,./tests/
+
+      # Upload coverage badge
+      - name: Coverage Badge
+        uses: tj-actions/coverage-badge-py@v2
+
+      # Verify Changed files
+      - name: Verify Changed files
+        uses: tj-actions/verify-changed-files@v14
+        id: verify-changed-files
+        with:
+          files: coverage.svg
+
+      # Commit files
+      - name: Commit files
+        if: steps.verify-changed-files.outputs.files_changed == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add coverage.svg
+          git commit -m "Updated coverage.svg"
+
+      # Push changes
+      - name: Push changes
+        if: steps.verify-changed-files.outputs.files_changed == 'true'
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.github_token }}
+          branch: ${{ github.ref }}
