@@ -1,0 +1,14 @@
+topics:
+  - name: topic1
+    num_partitions: 1
+    replication_factor: 1
+    cleanup_policy: delete
+    retention_days: 1
+
+acls:
+  - resource_type: INVALID
+    resource_name: topic1
+    principal: User:kafka
+    host: "*"
+    operation: READ
+    permission_type: ALLOW

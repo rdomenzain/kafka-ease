@@ -1,0 +1,6 @@
+acls:
+  - resource_type: TOPIC
+    principal: User:kafka
+    host: "*"
+    operation: READ
+    permission_type: ALLOW
