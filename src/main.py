@@ -1,6 +1,8 @@
 from click import ClickException, option, group, Choice
 from dotenv import load_dotenv
 
+from .command import Command
+
 load_dotenv()
 
 
@@ -69,7 +71,16 @@ def apply(
         only_validate (bool): Only validate the file.
     """
     try:
-        pass
+        cmd: Command = Command(
+            kafka_brokers=kafka_brokers,
+            security_protocol=security_protocol,
+            sasl_mechanism=sasl_mechanism,
+            sasl_username=sasl_username,
+            sasl_password=sasl_password,
+            file=file,
+            only_validate=only_validate,
+        )
+        cmd.run()
     except Exception as e:
         raise ClickException(str(e))
 

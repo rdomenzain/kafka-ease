@@ -17,6 +17,8 @@ from kafka.admin import (
 
 
 class KafkaHandler:
+    """This class is responsible for handling Kafka topics and ACLs."""
+
     def __init__(
         self,
         kafka_brokers: str,
@@ -66,11 +68,11 @@ class KafkaHandler:
                     echo(f"Topic {topic.name} created")
 
     def create_acls(self, acls: List[ACL]):
-        """Create ACLs and update if exists.
+        """Create new ACLs and remove old ones.
         Args:
             acls (List[ACL]): List of ACLs to create
         """
-        filter_acls = ACLFilter(
+        filter_acls: ACLFilter = ACLFilter(
             principal=None,
             host=None,
             operation=ACLOperation.ANY,
@@ -81,14 +83,34 @@ class KafkaHandler:
                 pattern_type=ACLResourcePatternType.ANY,
             ),
         )
-        acls_metadata = self.admin_client.describe_acls(acl_filter=filter_acls)
-        echo(f"Removing old ACLs {len(acls_metadata[0])}")
-        for acl in acls_metadata[0]:
-            self.admin_client.delete_acls([acl])
+        kafka_acls = self.admin_client.describe_acls(acl_filter=filter_acls)
 
         for acl in acls:
-            self.admin_client.create_acls([acl])
-            echo(f"ACL {acl.principal} synced")
+            filter_acls = ACLFilter(
+                principal=acl.principal,
+                host=acl.host,
+                operation=acl.operation,
+                permission_type=acl.permission_type,
+                resource_pattern=ResourcePatternFilter(
+                    resource_type=acl.resource_pattern.resource_type,
+                    resource_name=acl.resource_pattern.resource_name,
+                    pattern_type=acl.resource_pattern.pattern_type,
+                ),
+            )
+            file_acls = self.admin_client.describe_acls(acl_filter=filter_acls)
+            if len(file_acls[0]) > 0:
+                echo(f"ACL {acl.principal} already exists")
+            else:
+                self.admin_client.create_acls([acl])
+                echo(f"ACL {acl.principal} created")
+
+            for kafka_acl in kafka_acls[0]:
+                if kafka_acl == acl:
+                    kafka_acls[0].remove(kafka_acl)
+
+        for kafka_acl in kafka_acls[0]:
+            self.admin_client.delete_acls([kafka_acl])
+            echo(f"ACL {kafka_acl.principal} removed")
 
     def close(self):
         """Close the KafkaAdminClient."""
