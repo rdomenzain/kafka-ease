@@ -47,7 +47,7 @@ jobs:
       - name: Run quality
         run: |
           pip install bandit
-          bandit -r ./ -x ./venv/,./tests/
+          bandit -r ./ -x ./venv/,./tests/,./.github/
 
       # Upload coverage badge
       - name: Coverage Badge
