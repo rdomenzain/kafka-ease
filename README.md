@@ -191,3 +191,5 @@ Options:
   > Initial release of Kafka Ease
 - 1.0.1 (2023-09-20)
   > Fix packaging error
+- 1.0.2 (2023-09-20)
+  > Fix minor bugs
