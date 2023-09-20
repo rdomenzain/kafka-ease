@@ -1,0 +1,79 @@
+name: CI/CD Kafka Ease
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  kafka-ease:
+    strategy:
+      matrix:
+        python-version: [3.9]
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Switch to Current Branch
+        run: git checkout ${{ env.BRANCH }}
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov
+
+      # Run Unit Tests and generate coverage report
+      - name: Run Unit Tests and generate coverage report
+        run: |
+          python -m unittest -v
+          coverage run -m pytest
+          coverage report -m
+
+      # Run quality
+      - name: Run quality
+        run: |
+          pip install bandit
+          bandit -r ./ -x ./venv/,./tests/
+
+      # Upload coverage badge
+      - name: Coverage Badge
+        uses: tj-actions/coverage-badge-py@v2
+
+      # Verify Changed files
+      - name: Verify Changed files
+        uses: tj-actions/verify-changed-files@v14
+        id: verify-changed-files
+        with:
+          files: coverage.svg
+
+      # Commit files
+      - name: Commit files
+        if: steps.verify-changed-files.outputs.files_changed == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add coverage.svg
+          git commit -m "Updated coverage.svg"
+
+      # Push changes
+      - name: Push changes
+        if: steps.verify-changed-files.outputs.files_changed == 'true'
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.github_token }}
+          branch: ${{ github.head_ref }}
+          force: true

@@ -1,0 +1,26 @@
+topics:
+  - name: topic1
+    num_partitions: 1
+    replication_factor: 1
+    cleanup_policy: delete
+    retention_days: 1
+  - name: topic2
+    num_partitions: 1
+    replication_factor: 1
+    cleanup_policy: delete
+    retention_days: 7
+
+acls:
+  - resource_type: TOPIC
+    resource_name: topic1
+    principal: User:kafka
+    host: "*"
+    operation: READ
+    permission_type: ALLOW
+    pattern_type: PREFIXED
+  - resource_type: TOPIC
+    resource_name: topic2
+    principal: User:kafka
+    host: "*"
+    operation: READ
+    permission_type: ALLOW
