@@ -82,7 +82,7 @@ class Command:
             echo("SASL username not found.")
             return
 
-        if self.sasl_password == "" or self.sasl_password is None:
+        if self.sasl_password == "" or self.sasl_password is None:  # nosec
             echo("SASL password not found.")
             return
 
