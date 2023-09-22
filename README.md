@@ -9,6 +9,8 @@ Automating the creation of topics and ACLs is a common task for Kafka administra
 
 [![CI](https://github.com/rdomenzain/kafka-ease/actions/workflows/main.yml/badge.svg)](https://github.com/rdomenzain/kafka-ease/actions/workflows/main.yml)
 
+See the [documentation](https://rdomenzain.github.io/kafka-ease/) for more information.
+
 ## Contents
 
 - [Kafka Ease](#kafka-ease)
