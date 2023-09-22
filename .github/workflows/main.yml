@@ -17,7 +17,7 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
@@ -25,7 +25,7 @@ jobs:
         run: git checkout ${{ env.BRANCH }}
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -77,3 +77,10 @@ jobs:
           github_token: ${{ secrets.github_token }}
           branch: ${{ github.head_ref }}
           force: true
+
+      # Deploy GitHub Pages
+      - name: Deploy GitHub Pages
+        if: github.event.ref == 'refs/heads/master'
+        run: |
+          pip install -r requirements-docs.txt
+          mkdocs gh-deploy --force --clean --verbose
